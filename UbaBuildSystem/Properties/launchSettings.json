@@ -2,7 +2,7 @@
   "profiles": {
     "UbaBuildSystem": {
       "commandName": "Project",
-      "commandLineArgs": "RebuildSolution"
+      "commandLineArgs": "Rebuild"
     }
   }
 }

@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using UbaBuildSystem.Plugins.Core;
+using PluginsPath = UbaBuildSystem.Plugins.Core.Path;
+using SystemIOPath = System.IO.Path;
 
 namespace UbaBuildSystem
 {
@@ -66,12 +64,12 @@ namespace UbaBuildSystem
         static Assembly LoadPlugin(string relativePath)
         {
             // Navigate up to the solution root
-            string root = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location)!, "Plugins"));
+            string root = PluginsPath.GetPluginsRoot();
 
-            string pluginLocation = Path.GetFullPath(Path.Combine(root, relativePath.Replace('\\', Path.DirectorySeparatorChar)));
+            string pluginLocation = SystemIOPath.GetFullPath(SystemIOPath.Combine(root, relativePath.Replace('\\', SystemIOPath.DirectorySeparatorChar)));
             Console.WriteLine($"Loading commands from: {pluginLocation}");
             PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
-            return loadContext.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(pluginLocation)));
+            return loadContext.LoadFromAssemblyName(new AssemblyName(SystemIOPath.GetFileNameWithoutExtension(pluginLocation)));
         }
 
         static IEnumerable<ICommand> CreateCommands(Assembly assembly)

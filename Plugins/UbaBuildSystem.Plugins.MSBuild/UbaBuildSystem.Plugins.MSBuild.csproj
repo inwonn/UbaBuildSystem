@@ -11,7 +11,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.21.12" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\UbaBuildSystem.Plugins.Core\UbaBuildSystem.Plugins.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="UbaMSBuild.Core.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
