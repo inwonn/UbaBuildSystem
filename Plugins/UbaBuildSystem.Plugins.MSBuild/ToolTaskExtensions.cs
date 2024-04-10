@@ -1,4 +1,5 @@
 ﻿using UbaBuildSystem.Plugins.MSBuild.Generated;
+using static UbaBuildSystem.Plugins.MSBuild.BuildService;
 
 namespace UbaBuildSystem.Plugins.MSBuild
 {
@@ -47,7 +48,7 @@ namespace UbaBuildSystem.Plugins.MSBuild
             }
         }
 
-        public static object[]? ToLinkedActions(this ToolTask toolTask)
+        public static ToolTaskState[]? GenerateSubTaskStates(this ToolTask toolTask)
         {
             return null;
         }

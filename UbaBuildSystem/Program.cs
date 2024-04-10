@@ -1,100 +1,76 @@
 ﻿using System.Reflection;
-using UbaBuildSystem.Plugins.Core;
-using PluginsPath = UbaBuildSystem.Plugins.Core.Path;
+using UbaBuildSystem.Plugins;
+using UbaBuildSystem.Plugins.Core.Interfaces;
+using PluginsPath = UbaBuildSystem.Plugins.Core.Statics.Path;
 using SystemIOPath = System.IO.Path;
 
 namespace UbaBuildSystem
 {
     class Program
     {
+        private static Assembly CurrentDomain_AssemblyResolve1(object sender, ResolveEventArgs args)
+        {
+            // 추가 DLL이 존재하는 경로를 여기에 지정하세요.
+            string additionalDllPath = @"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\";
+
+            // 요청된 어셈블리 이름 가져오기
+            string assemblyName = new AssemblyName(args.Name).Name;
+
+            // 요청된 어셈블리가 추가 DLL 경로에 존재하는지 확인
+            string assemblyPath = SystemIOPath.Combine(additionalDllPath, assemblyName + ".dll");
+            if (File.Exists(assemblyPath))
+            {
+                return Assembly.LoadFrom(assemblyPath);
+            }
+
+            return null; // 요청된 어셈블리를 찾을 수 없음
+        }
+        private static Assembly CurrentDomain_AssemblyResolve2(object sender, ResolveEventArgs args)
+        {
+            // 추가 DLL이 존재하는 경로를 여기에 지정하세요.
+            string additionalDllPath = @"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\";
+
+            // 요청된 어셈블리 이름 가져오기
+            string assemblyName = new AssemblyName(args.Name).Name;
+
+            // 요청된 어셈블리가 추가 DLL 경로에 존재하는지 확인
+            string assemblyPath = SystemIOPath.Combine(additionalDllPath, assemblyName + ".dll");
+            if (File.Exists(assemblyPath))
+            {
+                return Assembly.LoadFrom(assemblyPath);
+            }
+
+            return null; // 요청된 어셈블리를 찾을 수 없음
+        }
+
         static void Main(string[] args)
         {
             try
             {
-                if (args.Length == 1 && args[0] == "/d")
-                {
-                    Console.WriteLine("Waiting for any key...");
-                    Console.ReadLine();
-                }
+                //AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve1;
+                //AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve2;
+                //Assembly CPPTasksAssembly = AppDomain.CurrentDomain.Load("Microsoft.Build.CPPTasks.Common");
 
-                string[] pluginPaths = new string[]
-                {
-                    @"UbaBuildSystem.Plugins.MSBuild\\UbaBuildSystem.Plugins.MSBuild.dll",
-                };
+                //var CLType = CPPTasksAssembly.GetType("Microsoft.Build.CPPTasks.CL");
+                //var CLTask = Activator.CreateInstance(CLType);
 
-                IEnumerable<ICommand> commands = pluginPaths.SelectMany(pluginPath =>
-                {
-                    Assembly pluginAssembly = LoadPlugin(pluginPath);
-                    return CreateCommands(pluginAssembly);
-                }).ToList();
+                //var CLCommandLineType = CPPTasksAssembly.GetType("Microsoft.Build.CPPTasks.CLCommandLine");
+                //var CLCommandLineTask = Activator.CreateInstance(CLCommandLineType);
 
-                if (args.Length == 0)
-                {
-                    Console.WriteLine("Commands: ");
-                    foreach (ICommand command in commands)
-                    {
-                        Console.WriteLine($"{command.Name}\t - {command.Description}");
-                    }
-                }
-                else
-                {
-                    foreach (string commandName in args)
-                    {
-                        Console.WriteLine($"-- {commandName} --");
+                //if (args.Length == 1 && args[0] == "/d")
+                //{
+                //    Console.WriteLine("Waiting for any key...");
+                //    Console.ReadLine();
+                //}
 
-                        ICommand? command = commands.FirstOrDefault(c => c.Name == commandName);
-                        if (command == null)
-                        {
-                            Console.WriteLine("No such command is known.");
-                            return;
-                        }
+                PluginLoadContextManager pluginLoadContextManager = new PluginLoadContextManager();
+                ICommand? command = pluginLoadContextManager.GetCommand("UbaBuildSystem.Plugins.MSBuild", "RebuildCommand");
 
-                        _ = command.ExecuteAsync();
-
-                        Console.WriteLine();
-                    }
-                }
+                
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-            }
-        }
-
-        static Assembly LoadPlugin(string relativePath)
-        {
-            // Navigate up to the solution root
-            string root = PluginsPath.GetPluginsRoot();
-
-            string pluginLocation = SystemIOPath.GetFullPath(SystemIOPath.Combine(root, relativePath.Replace('\\', SystemIOPath.DirectorySeparatorChar)));
-            Console.WriteLine($"Loading commands from: {pluginLocation}");
-            PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
-            return loadContext.LoadFromAssemblyName(new AssemblyName(SystemIOPath.GetFileNameWithoutExtension(pluginLocation)));
-        }
-
-        static IEnumerable<ICommand> CreateCommands(Assembly assembly)
-        {
-            int count = 0;
-
-            foreach (Type type in assembly.GetTypes())
-            {
-                if (typeof(ICommand).IsAssignableFrom(type))
-                {
-                    ICommand? result = Activator.CreateInstance(type) as ICommand;
-                    if (result != null)
-                    {
-                        count++;
-                        yield return result;
-                    }
-                }
-            }
-
-            if (count == 0)
-            {
-                string availableTypes = string.Join(",", assembly.GetTypes().Select(t => t.FullName));
-                throw new ApplicationException(
-                    $"Can't find any type which implements ICommand in {assembly} from {assembly.Location}.\n" +
-                    $"Available types: {availableTypes}");
             }
         }
     }

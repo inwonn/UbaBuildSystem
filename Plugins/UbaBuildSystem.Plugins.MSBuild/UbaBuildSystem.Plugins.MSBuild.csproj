@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
@@ -19,9 +19,64 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="EpicGames.Build">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.Build.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.Core">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.Horde">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.Horde.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.IoHash">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.IoHash.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.OIDC">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.OIDC.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.Serialization">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.UBA">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.UBA.dll</HintPath>
+    </Reference>
+    <Reference Include="EpicGames.UHT">
+      <HintPath>..\..\UnrealBuildTool\EpicGames.UHT.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CodeAnalysis.Workspaces">
+      <HintPath>..\..\UnrealBuildTool\Microsoft.CodeAnalysis.Workspaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection">
+      <HintPath>..\..\UnrealBuildTool\Microsoft.Extensions.DependencyInjection.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Http.Polly">
+      <HintPath>..\..\UnrealBuildTool\Microsoft.Extensions.Http.Polly.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>..\..\UnrealBuildTool\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Configuration">
+      <HintPath>..\..\UnrealBuildTool\Microsoft.Extensions.Logging.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Console">
+      <HintPath>..\..\UnrealBuildTool\Microsoft.Extensions.Logging.Console.dll</HintPath>
+    </Reference>
+    <Reference Include="UnrealBuildTool">
+      <HintPath>..\..\UnrealBuildTool\UnrealBuildTool.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ThirdParty\UbaMSBuild.Core.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="UbaMSBuild.Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ThirdParty\" />
   </ItemGroup>
 
 </Project>
