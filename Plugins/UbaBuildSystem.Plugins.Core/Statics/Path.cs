@@ -13,5 +13,10 @@ namespace UbaBuildSystem.Plugins.Core.Statics
         {
             return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location)!, "Plugins");
         }
+
+        public static string GetTempRoot()
+        {
+            return System.IO.Path.Combine(System.IO.Path.GetTempPath(), "UbaBuildSystem");
+        }
     }
 }

@@ -9,7 +9,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4C69
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UbaBuildSystem.Plugins.Core", "Plugins\UbaBuildSystem.Plugins.Core\UbaBuildSystem.Plugins.Core.csproj", "{C3C5807E-5A57-425C-8D97-F00B8ADD2393}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UbaBuildSystem.Plugins.MSBuild", "Plugins\UbaBuildSystem.Plugins.MSBuild\UbaBuildSystem.Plugins.MSBuild.csproj", "{5169D77B-C506-4B03-B44F-9228683FF837}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UbaBuildSystem.Plugins.MSBuild", "Plugins\UbaBuildSystem.Plugins.MSBuild\UbaBuildSystem.Plugins.MSBuild.csproj", "{5169D77B-C506-4B03-B44F-9228683FF837}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UbaBuildSystem.Plugins.Core.Tests", "Plugins\UbaBuildSystem.Plugins.Core.Tests\UbaBuildSystem.Plugins.Core.Tests.csproj", "{0D192337-036B-4677-955C-7078EAA91EDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{5169D77B-C506-4B03-B44F-9228683FF837}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5169D77B-C506-4B03-B44F-9228683FF837}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5169D77B-C506-4B03-B44F-9228683FF837}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D192337-036B-4677-955C-7078EAA91EDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D192337-036B-4677-955C-7078EAA91EDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D192337-036B-4677-955C-7078EAA91EDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D192337-036B-4677-955C-7078EAA91EDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

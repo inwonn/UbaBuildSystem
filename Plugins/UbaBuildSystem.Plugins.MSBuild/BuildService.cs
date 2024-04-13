@@ -1,101 +1,110 @@
-﻿using EpicGames.Core;
-using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-using UbaBuildSystem.Plugins.MSBuild.Generated;
+using System.Text;
+using System.Text.Json;
+using PathStatics = UbaBuildSystem.Plugins.Core.Statics.Path;
 
 namespace UbaBuildSystem.Plugins.MSBuild
 {
 
     internal class BuildService : IDisposable
     {
-        #region PInvoke_UbaMSBuild.Core.dll
-        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
-        public extern static IntPtr CreateProcessWithDll(string commandLine, string buildId, string dllPath);
+        #region PInvoke_kernel32.dll
+        const uint LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 
-        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
-        public extern static uint HostGetToolTaskCount(string buildId);
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool SetDefaultDllDirectories(uint DirectoryFlags);
 
-        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
-        public extern static bool HostGetToolTask(string buildId, int toolTaskId, out IntPtr outToolTask, out uint size);
-
-        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
-        public extern static bool HostSetToolTaskStatus(string buildId, int toolTaskId, uint toolTaskStatus);
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern int AddDllDirectory(string NewDirectory);
         #endregion
 
-        private Dictionary<int/*toolTaskId*/, ToolTaskState> _toolTasks = new Dictionary<int, ToolTaskState>();
-        private UbaSessionServer _ubaSessionServer = new UbaSessionServer();
+        #region PInvoke_UbaMSBuild.Core.dll
+        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
+        public extern static IntPtr CreateProcessWithDll(string commandLine, string buildId, string dllPath, out uint pid);
+
+        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
+        public extern static uint GetToolTaskCount(string buildId);
+
+        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
+        public extern static bool GetToolTask(string buildId, int toolTaskId, out IntPtr outToolTask, out uint size);
+
+        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
+        public extern static bool SetToolTaskStatus(string buildId, int toolTaskId, uint toolTaskStatus);
+
+        [DllImport("UbaMSBuild.Core.dll", CharSet = CharSet.Unicode)]
+        public extern static uint GetToolTaskStatus(string buildId, int toolTaskId);
+        #endregion
+
+        private Dictionary<int/*toolTaskId*/, ToolTask> _toolTasks = new Dictionary<int, ToolTask>();
 
         public BuildService()
         {
-            ILogger Logger = Log.Logger;
-            _ubaSessionServer.Start(Logger);
+
         }
 
         public void Dispose()
         {
-            _ubaSessionServer?.Dispose();
         }
 
-        public async Task<int> BuildAsync()
+        public Task<int> BuildAsync()
         {
-            //string commandLine = "";
+            SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+            AddDllDirectory(Path.Combine(PathStatics.GetPluginsRoot(), "UbaBuildSystem.Plugins.MSBuild", "runtimes"));
+
+            string sln = @"D:\Git\UbaMSBuild\Binaries\x64\Debug\UbaMSBuild.Core.Test\TestData\BuildTest\BuildTest.sln";
+            string dllPath = @"D:\Git\UbaBuildSystem\Plugins\UbaBuildSystem.Plugins.MSBuild\runtimes\UbaMSBuild.Core.dll";
+            string commandLine = $"\"C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe\" {sln} /Rebuild \"Debug|x64\"";
             string buildId = Guid.NewGuid().ToString();
-            //string dllPath = "";
-            //IntPtr hProcess = CreateProcessWithDll(commandLine, buildId, dllPath);
-            IntPtr hProcess = IntPtr.Zero;
-            Process devenv = Process.GetProcesses().First(p => p.Handle == hProcess);
+            Environment.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", "1");
+            CreateProcessWithDll(commandLine, buildId, dllPath, out uint pid);
+            Process devenv = Process.GetProcessById((int)pid);
 
-
-            await ProcessToolTaskAsync(buildId, devenv);
-
-            return 0;
-        }
-
-        private Task<int> ProcessToolTaskAsync(string buildId, Process devenv)
-        {
-            return Task.Run(() =>
+            while (devenv.HasExited == false)
             {
-                while (devenv.HasExited == false)
+                uint toolTaskCount = GetToolTaskCount(buildId);
+                for (int toolTaskId = 0; toolTaskId < toolTaskCount; toolTaskId++)
                 {
-                    uint toolTaskCount = HostGetToolTaskCount(buildId);
-                    for (int toolTaskId = 0; toolTaskId < toolTaskCount; toolTaskId++)
+                    if (GetToolTaskStatus(buildId, toolTaskId) == 4)
                     {
-                        if (HostGetToolTask(buildId, toolTaskId, out IntPtr toolTaskPtr, out uint size))
+                        if (GetToolTask(buildId, toolTaskId, out IntPtr toolTaskPtr, out uint size))
                         {
                             byte[] toolTaskBytes = new byte[size];
                             Marshal.Copy(toolTaskPtr, toolTaskBytes, 0, toolTaskBytes.Length);
-                            ToolTask toolTask = ToolTask.Parser.ParseFrom(toolTaskBytes);
-
-                            _toolTasks[toolTaskId] = new ToolTaskState(toolTask, ToolTaskStatus.Created);
-                        }
-                    }
-
-                    foreach (var toolTaskPair in _toolTasks)
-                    {
-                        int toolTaskId = toolTaskPair.Key;
-                        var toolTaskState = toolTaskPair.Value;
-                        if (toolTaskState.Status == ToolTaskStatus.Created)
-                        {
-                        }
-                        else if (toolTaskState.IsRunning())
-                        {
-                        }
-                        else if (toolTaskState.IsCompleted())
-                        {
-                            HostSetToolTaskStatus(buildId, toolTaskId, (uint)ToolTaskStatus.Completed);
-                            _toolTasks.Remove(toolTaskId);
-                        }
-                        else if (toolTaskState.IsFaulted())
-                        {
-                            HostSetToolTaskStatus(buildId, toolTaskId, (uint)ToolTaskStatus.Faulted);
-                            _toolTasks.Remove(toolTaskId);
+                            string jsonText = Encoding.UTF8.GetString(toolTaskBytes);
+                            try
+                            {
+                                ToolTask? toolTask = JsonSerializer.Deserialize<ToolTask>(jsonText);
+                                if (toolTask != null)
+                                {
+                                    _toolTasks.Add(toolTaskId, toolTask);
+                                }
+                            }
+                            catch
+                            {
+                                SetToolTaskStatus(buildId, toolTaskId, (uint)ToolTask.ToolTaskStatus.Faulted);
+                            }
                         }
                     }
                 }
 
-                return devenv.ExitCode;
-            });
+                foreach (var toolTaskPair in _toolTasks)
+                {
+                    int toolTaskId = toolTaskPair.Key;
+                    var toolTaskState = toolTaskPair.Value;
+                    switch (toolTaskState.Status)
+                    {
+                        case ToolTask.ToolTaskStatus.RanToCompletion:
+                        default:
+                            SetToolTaskStatus(buildId, toolTaskId, (uint)ToolTask.ToolTaskStatus.RanToCompletion);
+                            _toolTasks.Remove(toolTaskId);
+                            break;
+                    }
+                }
+            }
+
+            return Task.FromResult(0);
+            //return Task.FromResult(devenv.ExitCode);
         }
     }
 }

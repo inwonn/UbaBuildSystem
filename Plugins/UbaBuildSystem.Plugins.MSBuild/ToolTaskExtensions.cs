@@ -1,5 +1,5 @@
 ﻿using UbaBuildSystem.Plugins.MSBuild.Generated;
-using static UbaBuildSystem.Plugins.MSBuild.BuildService;
+//using static UbaBuildSystem.Plugins.MSBuild.BuildService;
 
 namespace UbaBuildSystem.Plugins.MSBuild
 {

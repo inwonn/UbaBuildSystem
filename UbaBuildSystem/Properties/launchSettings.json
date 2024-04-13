@@ -2,7 +2,8 @@
   "profiles": {
     "UbaBuildSystem": {
       "commandName": "Project",
-      "commandLineArgs": "Rebuild"
+      "commandLineArgs": "Rebuild",
+      "nativeDebugging": true
     }
   }
 }
