@@ -19,11 +19,6 @@ namespace UbaBuildSystem
             ICommand? command = plugin?.GetCommand("BuildCommand");
             bool? isSuccess = command?.ExecuteAsync().Result;
 
-            //if (command?.ExecuteAsync().Result == false)
-            {
-
-            }
-
             return 0;
         }
     }

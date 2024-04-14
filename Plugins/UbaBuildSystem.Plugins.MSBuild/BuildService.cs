@@ -106,5 +106,16 @@ namespace UbaBuildSystem.Plugins.MSBuild
             return Task.FromResult(0);
             //return Task.FromResult(devenv.ExitCode);
         }
+
+        private void LoadVsSolution()
+        {
+            VsSolution sln = new VsSolution(@"D:\Git\UbaMSBuild\Binaries\x64\Debug\UbaMSBuild.Core.Test\TestData\BuildTest\BuildTest.sln");
+            sln.Load();
+        }
+
+        private void LoadVcxproj()
+        {
+            
+        }
     }
 }

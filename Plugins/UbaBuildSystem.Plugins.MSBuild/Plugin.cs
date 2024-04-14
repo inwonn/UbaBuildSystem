@@ -14,5 +14,15 @@ namespace UbaBuildSystem.Plugins.MSBuild
         public Plugin(Assembly pluginAssembly, string pluginDir) : base(pluginAssembly, pluginDir)
         {
         }
+
+        public override void PreLoad()
+        {
+            if (PluginLoadContext != null)
+            {
+                string[] runtimeDeps = Directory.GetDirectories(@"C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\", "*", SearchOption.AllDirectories).ToArray();
+
+                PluginLoadContext.RuntimeDependencylDir = runtimeDeps;
+            }
+        }
     }
 }
